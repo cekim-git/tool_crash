@@ -2,3 +2,20 @@
 
 Work in progress to develop crash detection plugin for klipper-toolchanger that supports inductive as well as tap probes and attempts address issues with existing crash detection
 This is Alpha code... you shouldn't be using it... 
+
+# Usage
+- Add tool_crash.py to klipper/klippy/extras
+- Clear pycache and restart klipper
+- add [tool_crash] to printer.cfg
+- add start/stop calls to [homing_override] and PRINT_START/PRINT_END as previously with names
+  - START_TOOL_CRASH_DETECTION/ STTOP_TOOL_CRASH_DETECTION
+- If using inductive probing, no TAP trigger should occur during homing... so no further action should be requied
+- If using TAP probing you can either add STOP/START to your homing_override use use the ignore feature in the [tool_crash] .cfg section
+  - ignore_events: probing
+- Other configuration variables which can be changed, but should not need to be:
+  - watchdog_interval: 0.5
+  - watchdog_threshold: 2
+  - home_timeblock: 1.0
+- watchdog_interval is the time in seconds between consistency checks of toolchanger internal state
+- watchdog_threshold is the number of times an error condution must be observed by the watchdog before emitting an error
+- home_timeblock is the time that must after a home probe event before instant TAP sensor error detection will be reported if "ignore_events: probing" is set.... 
