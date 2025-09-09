@@ -13,9 +13,9 @@ This is Alpha code... you shouldn't be using it...
 - If using TAP probing you can either add STOP/START to your homing_override use use the ignore feature in the [tool_crash] .cfg section
   - ignore_events: probing
 - Other configuration variables which can be changed, but should not need to be:
-  - watchdog_interval: 0.5
-  - watchdog_threshold: 2
-  - home_timeblock: 1.0
+  - watchdog_interval: 0.5  \# seconds between consistency checks
+  - watchdog_threshold: 2   \# number of times we must see an error condition prior to reporting it
+  - home_timeblock: 1.0     \# time in seconds after a homing event before instant error reporting
   - crash_gcode: \# custom gcode called in place of the hard-shutdown on error... not required, not tested...
 - watchdog_interval is the time in seconds between consistency checks of toolchanger internal state
 - watchdog_threshold is the number of times an error condution must be observed by the watchdog before emitting an error
