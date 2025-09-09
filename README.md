@@ -8,7 +8,8 @@ This is Alpha code... you shouldn't be using it...
 - Clear pycache and restart klipper
 - add [tool_crash] to printer.cfg
 - add start/stop calls to [homing_override] and PRINT_START/PRINT_END as previously with names
-  - START_TOOL_CRASH_DETECTION/ STTOP_TOOL_CRASH_DETECTION
+  - START_TOOL_CRASH_DETECTION/ STOP_TOOL_CRASH_DETECTION
+  - NOTE: you should remove any cals to START/STOP_TOOL_PROBE_CRASH_DETECTION
 - If using inductive probing, no TAP trigger should occur during homing... so no further action should be requied
 - If using TAP probing you can either add STOP/START to your homing_override use use the ignore feature in the [tool_crash] .cfg section
   - ignore_events: probing
