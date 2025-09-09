@@ -54,7 +54,6 @@ class ToolCrash:
         self._home_timeblock=config.getfloat('home_timeblock',1.0)
         self._state = STATE_IDLE
         self._watchdog_timer = None
-        self._invert = True if not tool_probe_pins else False
         
         self.printer.register_event_handler('klippy:connect', self._on_connect)
         self.printer.register_event_handler('homing:homing_move_begin', self._on_homing_move_begin)
