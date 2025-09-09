@@ -1,4 +1,4 @@
-# Crash Detectrion Support for toolchnagers
+# Crash Detectrion Support for toolchangers
 #
 # Copyright (C) 2025 @Contomo and @cekim some contents derived from
 #                    Viesturs Zarins <viesturz@gmail.com> works
