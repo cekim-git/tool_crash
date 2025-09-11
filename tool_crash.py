@@ -1,7 +1,6 @@
-# Crash Detectrion Support for toolchangers
+# Support for toolchnagers
 #
-# Copyright (C) 2025 @Contomo and @cekim some contents derived from
-#                    Viesturs Zarins <viesturz@gmail.com> works
+# Copyright (C) 2025 @Contomo and @cekim
 #
 # This file may be distributed under the terms of the GNU GPLv3 license.
 
@@ -54,6 +53,7 @@ class ToolCrash:
         self._home_timeblock=config.getfloat('home_timeblock',1.0)
         self._state = STATE_IDLE
         self._watchdog_timer = None
+        self._invert=False
         
         self.printer.register_event_handler('klippy:connect', self._on_connect)
         self.printer.register_event_handler('homing:homing_move_begin', self._on_homing_move_begin)
@@ -69,7 +69,9 @@ class ToolCrash:
         buttons = self.printer.load_object(config, 'buttons')
         ppins   = self.printer.lookup_object('pins')
 
-        detection_pins = tool_detect_pins if tool_detect_pins else tool_probe_pins
+        # falling edge for detection pins - rising for tool_probe
+        self._invert = False if tool_probe_pins else True
+        detection_pins = tool_probe_pins if tool_probe_pins else tool_detect_pins
         
         for pin in detection_pins:
             base = f"{pin['chip_name']}:{pin['pin']}"
@@ -151,8 +153,8 @@ class ToolCrash:
         # if we are not enabled, ignore it
         if not self.enabled:
             return
-        # detect only falling edge tool mounted has gone false
-        if is_triggered:
+         # detect only falling edge for detection_pin, rising for tool_probe.pin
+        if not (bool(is_triggered) ^ bool(self._invert)):
             return
         # check for toolchange state - ignore it
         if self.toolchanger.status in (STATUS_CHANGING, STATUS_INITIALIZING):
@@ -162,10 +164,6 @@ class ToolCrash:
         if self._state == STATE_PROBING or (home_event_delta < self._home_timeblock):
             if IGN_PROBING in self.ignore:
                 return
-            else:
-                crash = self.enabled
-        else:
-            crash = self.enabled
 
         err_msg = "tool_crash detected"
         if self.toolchanger.active_tool is not None:
@@ -174,6 +172,8 @@ class ToolCrash:
         self._do_crash(err_msg)
 
     def _do_crash(self,msg):
+        self.enabled = False
+        self._cancel_watchdog()       
         self.gcode.respond_info(msg)
         ctx = {
             'expected': (self.expected_tool.name if self.expected_tool else None),
@@ -206,3 +206,4 @@ class ToolCrash:
 
 def load_config(config):
     return ToolCrash(config)
+    
