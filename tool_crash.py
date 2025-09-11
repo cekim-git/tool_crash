@@ -116,6 +116,7 @@ class ToolCrash:
         self._watchdog_timer = self.reactor.register_timer(_tick, self.reactor.monotonic() + self._watchdog_interval)
 
     def _cancel_watchdog(self):
+        self._watchdog_error_count = 0
         if self._watchdog_timer is not None:
             self.reactor.unregister_timer(self._watchdog_timer)
             self._watchdog_timer = None
@@ -173,7 +174,7 @@ class ToolCrash:
 
     def _do_crash(self,msg):
         self.enabled = False
-        self._cancel_watchdog()       
+        self._cancel_watchdog()
         self.gcode.respond_info(msg)
         ctx = {
             'expected': (self.expected_tool.name if self.expected_tool else None),
