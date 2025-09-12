@@ -53,7 +53,6 @@ class ToolCrash:
         self._home_timeblock=config.getfloat('home_timeblock',1.0)
         self._state = STATE_IDLE
         self._watchdog_timer = None
-        self._invert=False
         
         self.printer.register_event_handler('klippy:connect', self._on_connect)
         self.printer.register_event_handler('homing:homing_move_begin', self._on_homing_move_begin)
@@ -69,13 +68,14 @@ class ToolCrash:
         buttons = self.printer.load_object(config, 'buttons')
         ppins   = self.printer.lookup_object('pins')
 
-        # falling edge for detection pins - rising for tool_probe
-        self._invert = False if tool_probe_pins else True
+        # use the same state pins that toolchanger will use based on .cfg
         detection_pins = tool_probe_pins if tool_probe_pins else tool_detect_pins
-        
+
+        # allow multi-use and register each pin matching toolchanger polarity
         for pin in detection_pins:
-            base = f"{pin['chip_name']}:{pin['pin']}"
+            base = f"{pin['chip_name']}:{pin['pin']}"          
             ppins.allow_multi_use_pin(base)
+            base = '!' + base if pin['invert'] else base
             buttons.register_buttons([base], self._on_detect_edge)
         
     def _now_pt(self):
@@ -147,15 +147,12 @@ class ToolCrash:
             
         # check to see if we've seen multiple consecutive failures
         if self._watchdog_error_count >= self._watchdog_error_threshold:
-            self._do_crash(err_msg)
+            self._do_crash(err_msg,self._now_pt())
 
     # Edge detection checks basded on trigger of sensors
     def _on_detect_edge(self, eventtime, is_triggered):
         # if we are not enabled, ignore it
         if not self.enabled:
-            return
-         # detect only falling edge for detection_pin, rising for tool_probe.pin
-        if not (bool(is_triggered) ^ bool(self._invert)):
             return
         # check for toolchange state - ignore it
         if self.toolchanger.status in (STATUS_CHANGING, STATUS_INITIALIZING):
@@ -170,25 +167,29 @@ class ToolCrash:
         if self.toolchanger.active_tool is not None:
             err_msg += ' ' + self.toolchanger.active_tool.name
 
-        self._do_crash(err_msg)
+        self._do_crash(err_msg,eventtime)
 
-    def _do_crash(self,msg):
+    def _do_crash(self,msg, etime):
         self.enabled = False
         self._cancel_watchdog()
         self.gcode.respond_info(msg)
+        # either halt now or run/queue custom g-code if provided
+        if self.crash_gcode is None:
+            self.printer.invoke_shutdown(msg)
+        else:
+            self.reactor.register_callback(lambda _: self._run_crash_gcode(), etime)
+            
+    def _run_crash_gcode(self):
         ctx = {
             'expected': (self.expected_tool.name if self.expected_tool else None),
             'detected': (self.toolchanger.detected_tool.name if self.toolchanger.detected_tool else None),
             'active':   (self.toolchanger.active_tool.name if self.toolchanger.active_tool else None),
         }
-        if self.crash_gcode is None:
-            self.printer.invoke_shutdown(msg)
-        else:
-            try:
-                self.gcode.run_script_from_command(self.crash_gcode.render(ctx))
-            except Exception as e:
-                self.gcode.respond_info(f'crash gcode failed. ({e})')
-                raise e 
+        try:
+            self.gcode.run_script_from_command(self.crash_gcode.render(ctx))
+        except Exception as e:
+            self.gcode.respond_info(f'crash gcode failed. ({e})')
+            raise e        
                
     cmd_START_TOOL_CRASH_DETECTION_help = """
     Enable tool crash detection. Optional T=<num>|TOOL=<name> to set the expected tool"""
@@ -207,4 +208,3 @@ class ToolCrash:
 
 def load_config(config):
     return ToolCrash(config)
-    
