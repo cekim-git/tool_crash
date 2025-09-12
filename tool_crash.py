@@ -46,11 +46,12 @@ class ToolCrash:
 
         self.enabled = False
         self.expected_tool = None
-        self._watchdog_interval=config.getfloat('watchdog_interval',0.500)
+        self.crash_mintime = config.getfloat('crash_mintime', 0.5, above=0.)
+        self._watchdog_interval=config.getfloat('watchdog_interval',0.500, above=0.)
         self._watchdog_error_count=0
         self._watchdog_error_threshold=config.getint('watchdog_threshold',2);
         self._home_timestamp=0.0
-        self._home_timeblock=config.getfloat('home_timeblock',1.0)
+        self._home_timeblock=config.getfloat('home_timeblock',1.0, above=0.)
         self._state = STATE_IDLE
         self._watchdog_timer = None
         
@@ -177,7 +178,7 @@ class ToolCrash:
         if self.crash_gcode is None:
             self.printer.invoke_shutdown(msg)
         else:
-            self.reactor.register_callback(lambda _: self._run_crash_gcode(), etime)
+            self.reactor.register_callback(lambda _: self._run_crash_gcode(), etime+self.crash_mintime)
             
     def _run_crash_gcode(self):
         ctx = {
