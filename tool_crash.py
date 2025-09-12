@@ -181,13 +181,8 @@ class ToolCrash:
             self.reactor.register_callback(lambda _: self._run_crash_gcode(), etime+self.crash_mintime)
             
     def _run_crash_gcode(self):
-        ctx = {
-            'expected': (self.expected_tool.name if self.expected_tool else None),
-            'detected': (self.toolchanger.detected_tool.name if self.toolchanger.detected_tool else None),
-            'active':   (self.toolchanger.active_tool.name if self.toolchanger.active_tool else None),
-        }
         try:
-            self.gcode.run_script_from_command(self.crash_gcode.render(ctx))
+            self.crash_gcode.run_gcode_from_command()
         except Exception as e:
             self.gcode.respond_info(f'crash gcode failed. ({e})')
             raise e        
