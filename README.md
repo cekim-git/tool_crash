@@ -8,7 +8,7 @@ This is Alpha code... you shouldn't be using it...
 - Clear pycache and restart klipper
   ```
   sudo systemctl stop klipper
-  cd ~/klipper ; find -name "*pycache*" -exec rm -rf \;
+  cd ~/klipper ; find -name "*pycache*" -exec rm -rf {} \;
   sudo systemctl restart klipper
   ```
 - add [tool_crash] to printer.cfg
