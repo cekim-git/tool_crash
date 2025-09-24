@@ -14,6 +14,7 @@ This is Alpha code... you shouldn't be using it...
 - add [tool_crash] to printer.cfg
   - Suggested initial configuration for inductance Z configurations is no arguments to this section
   - Suggested initial configuration for TAP configurations would be ingore_events: probing
+  - [tool_crash] should be added AFTER your toolchanger and tool .cfg files are included in your printer.cfg 
 - add start/stop calls to [homing_override] and PRINT_START/PRINT_END as previously with names
   - START_TOOL_CRASH_DETECTION/ STOP_TOOL_CRASH_DETECTION
     - Typical configuration will start during PRINT_HOME and stop during PRINT_END.
