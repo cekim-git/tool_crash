@@ -6,7 +6,14 @@ This is Alpha code... you shouldn't be using it...
 # Usage
 - Add tool_crash.py to klipper/klippy/extras
 - Clear pycache and restart klipper
+  ```
+  sudo systemctl stop klipper
+  cd ~/klipper ; find -name "*pycache*" -exec rm -rf \;
+  sudo systemctl restart klipper
+  ```
 - add [tool_crash] to printer.cfg
+  - Suggested initial configuration for inductance Z configurations is no arguments to this section
+  - Suggested initial configuration for TAP configurations would be ingore_events: probing
 - add start/stop calls to [homing_override] and PRINT_START/PRINT_END as previously with names
   - START_TOOL_CRASH_DETECTION/ STOP_TOOL_CRASH_DETECTION
   - NOTE: you should remove any calls to existing toolchanger based START/STOP_TOOL_PROBE_CRASH_DETECTION (note the additional "PROBE" in the name)
@@ -17,7 +24,8 @@ This is Alpha code... you shouldn't be using it...
   - watchdog_interval: 0.5  \# seconds between consistency checks
   - watchdog_threshold: 2   \# number of times we must see an error condition prior to reporting it
   - home_timeblock: 1.0     \# time in seconds after a homing event before instant error reporting
-  - crash_gcode: \# custom gcode called in place of the hard-shutdown on error... not required, not tested...
+  - crash_gcode: \# custom gcode called in place of the hard-shutdown on error... NOT REQUIRED
+  - WARNING: crash_gcode delays the response to a crash event by an amount dependant on what is queued up in terms of "movement" in the print.  Depending on the queued events, this can be seconds or minutes of delay.  For the most rapid response to TAP triggering, remove crash_gcode entirely from your configuration.  In testing, this has allowed it to catch and stop crashes before the head has even left the shuttle.  There is no guarantee it will stop it that fast, it depends on the speed of the "crash" event and the movement around it.
 - watchdog_interval is the time in seconds between consistency checks of toolchanger internal state
 - watchdog_threshold is the number of times an error condution must be observed by the watchdog before emitting an error
 - home_timeblock is the time that must after a home probe event before instant TAP sensor error detection will be reported if "ignore_events: probing" is set.... 
