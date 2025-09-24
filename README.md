@@ -16,6 +16,9 @@ This is Alpha code... you shouldn't be using it...
   - Suggested initial configuration for TAP configurations would be ingore_events: probing
 - add start/stop calls to [homing_override] and PRINT_START/PRINT_END as previously with names
   - START_TOOL_CRASH_DETECTION/ STOP_TOOL_CRASH_DETECTION
+    - Typical configuration will start during PRINT_HOME and stop during PRINT_END.
+    - Docking is implicitly ignored regardless of configuration.  No additional start/stop around docking is required
+    - Particularly for inductive (vs TAP) homing, it might make sense to START/STOP within your homing_override.
   - NOTE: you should remove any calls to existing toolchanger based START/STOP_TOOL_PROBE_CRASH_DETECTION (note the additional "PROBE" in the name)
 - If using inductive probing, no TAP trigger should occur during homing... so no further action should be requied
 - If using TAP probing you can either add STOP/START to your homing_override use use the ignore feature in the [tool_crash] .cfg section
