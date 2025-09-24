@@ -19,9 +19,9 @@ This is Alpha code... you shouldn't be using it...
   - START_TOOL_CRASH_DETECTION/ STOP_TOOL_CRASH_DETECTION
     - Typical configuration will start during PRINT_HOME and stop during PRINT_END.
     - Docking is implicitly ignored regardless of configuration.  No additional start/stop around docking is required
-    - Particularly for inductive (vs TAP) homing, it might make sense to START/STOP within your homing_override.
+    - Particularly for inductive (vs TAP) homing, it might make sense to START/STOP within your homing_override as well to detect crashes when manually homing.
   - NOTE: you should remove any calls to existing toolchanger based START/STOP_TOOL_PROBE_CRASH_DETECTION (note the additional "PROBE" in the name)
-- If using inductive probing, no TAP trigger should occur during homing... so no further action should be requied
+- If using inductive probing, no TAP trigger should occur during homing... so no further action should be required
 - If using TAP probing you can either add STOP/START to your homing_override use use the ignore feature in the [tool_crash] .cfg section
   - ignore_events: probing
 - Other configuration variables which can be changed, but should not need to be:
